@@ -9,8 +9,8 @@ type Props = {};
  * in order to work.
  *
  */
-function error({}: Props) {
+function ErrorPage({}: Props) {
   return <div>Something went wrong. Please refresh the page.</div>;
 }
 
-export default error;
+export default ErrorPage;
