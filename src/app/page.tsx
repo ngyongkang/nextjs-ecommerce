@@ -3,6 +3,10 @@ import prisma from '@/lib/db/prisma';
 import Image from 'next/image';
 import Link from 'next/link';
 
+/**
+ * Note that this is a server component as the function is asynchronous
+ * @returns
+ */
 export default async function Home() {
   const products = await prisma.product.findMany({
     orderBy: { id: 'desc' },
