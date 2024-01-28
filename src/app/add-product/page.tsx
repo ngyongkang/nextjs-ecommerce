@@ -58,7 +58,6 @@ export default function page({}: Props) {
           placeholder="Price"
           type="number"
           min="0"
-          step="0.01"
           className="input input-bordered mb-3 w-full"
         />
         <FormButton className="btn-block">Add Product</FormButton>
