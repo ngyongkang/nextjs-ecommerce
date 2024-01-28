@@ -9,7 +9,14 @@ export const metadata = {
   title: 'Add Product - Stick & Treat',
 };
 
-//Server function
+/**
+ * Function to perform __Server Action__ on Next JS, this function
+ * allows the usage of a form action which sends data via server instead
+ * of sending data via client. This helps to move the processing to backend
+ * as well as cut out code on the clientside such as fetching data from
+ * an api.
+ * @param formData - param to pass formData to backend.
+ */
 async function addProduct(formData: FormData) {
   'use server';
 

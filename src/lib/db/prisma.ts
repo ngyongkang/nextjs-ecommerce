@@ -1,3 +1,5 @@
+// To provide development environment a prisma client on load.
+
 import { PrismaClient } from '@prisma/client'
 
 const prismaClientSingleton = () => {

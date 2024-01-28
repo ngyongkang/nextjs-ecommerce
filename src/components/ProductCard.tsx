@@ -8,6 +8,11 @@ interface ProductCardProps {
   product: Product;
 }
 
+/**
+ * Custom react component to display a product in card format from Daisy UI.
+ * @param product - Param to take in product details.
+ * @returns A custom html to display a product.
+ */
 function ProductCard({ product }: ProductCardProps) {
   /**
    *  This helps to check if a product is within 7 days timestamp.
