@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import React from 'react';
 
 type Props = {};
@@ -10,7 +11,16 @@ type Props = {};
  *
  */
 function ErrorPage({}: Props) {
-  return <div>Something went wrong. Please refresh the page.</div>;
+  return (
+    <div className="flex flex-col gap-2">
+      <div>Something went wrong. Please refresh the page.</div>
+      <div>
+        <Link href={'/'} className="btn btn-primary uppercase">
+          Home
+        </Link>
+      </div>
+    </div>
+  );
 }
 
 export default ErrorPage;
