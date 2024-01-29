@@ -1,4 +1,4 @@
-import { RedirectType, redirect } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import React from 'react';
 import prisma from '@/lib/db/prisma';
 import FormButton from '@/components/FormButton';
@@ -31,8 +31,8 @@ async function addProduct(formData: FormData) {
   }
 
   //Validates if a user is admin
-  if (user?.email != 'nyk.com.sg@gmail.com') {
-    redirect('/unauthorised');
+  if (user?.type != 'Admin') {
+    redirect('/');
   }
 
   const name = formData.get('name')?.toString();
@@ -60,7 +60,7 @@ export default async function page({}: Props) {
   }
 
   //Validates if a user is admin
-  if (user?.email != 'nyk.com.sg@gmail.com') {
+  if (user?.type != 'Admin') {
     redirect('/unauthorised');
   }
 

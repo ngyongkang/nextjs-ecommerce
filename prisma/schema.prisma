@@ -82,6 +82,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   Cart          Cart[]
+  type          String    @default("Free")
 
   @@map("users")
 }
