@@ -2,6 +2,8 @@ import { redirect } from 'next/navigation';
 import React from 'react';
 import prisma from '@/lib/db/prisma';
 import FormButton from '@/components/FormButton';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../api/auth/[...nextauth]/route';
 
 type Props = {};
 
@@ -20,6 +22,13 @@ export const metadata = {
 async function addProduct(formData: FormData) {
   'use server';
 
+  //Validates if a user is currently logged in.
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    redirect('/api/auth/signin?callbackUrl=/add-product');
+  }
+
   const name = formData.get('name')?.toString();
   const description = formData.get('description')?.toString();
   const imageUrl = formData.get('imageUrl')?.toString();
@@ -35,7 +44,14 @@ async function addProduct(formData: FormData) {
   redirect('/');
 }
 
-export default function page({}: Props) {
+export default async function page({}: Props) {
+  //Validates if a user is currently logged in.
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    redirect('/api/auth/signin?callbackUrl=/add-product');
+  }
+
   return (
     <div>
       <h1 className="mb-3 text-lg font-bold">Add product</h1>

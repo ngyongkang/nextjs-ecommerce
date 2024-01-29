@@ -1,2 +1,4 @@
 //Use for setting delay in async functions.
 // await new Promise((r) => setTimeout(r, 3000)); 
+
+// Need to read up more on authentication for Next JS.
