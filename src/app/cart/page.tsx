@@ -29,6 +29,7 @@ async function page({}: Props) {
         <p className="mb-3 font-bold">
           Total: {formatPrice(cart?.subtotal || 0)}
         </p>
+        {/* Optional: Setup Stripe payment method for checkout. */}
         <button className="btn btn-primary uppercase sm:w-[200px]">
           Checkout
         </button>
