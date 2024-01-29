@@ -1,4 +1,4 @@
-import { redirect } from 'next/navigation';
+import { RedirectType, redirect } from 'next/navigation';
 import React from 'react';
 import prisma from '@/lib/db/prisma';
 import FormButton from '@/components/FormButton';
@@ -22,11 +22,17 @@ export const metadata = {
 async function addProduct(formData: FormData) {
   'use server';
 
-  //Validates if a user is currently logged in.
   const session = await getServerSession(authOptions);
+  const user = session?.user;
 
+  //Validates if a user is currently logged in.
   if (!session) {
     redirect('/api/auth/signin?callbackUrl=/add-product');
+  }
+
+  //Validates if a user is admin
+  if (user?.email != 'nyk.com.sg@gmail.com') {
+    redirect('/unauthorised');
   }
 
   const name = formData.get('name')?.toString();
@@ -45,11 +51,17 @@ async function addProduct(formData: FormData) {
 }
 
 export default async function page({}: Props) {
-  //Validates if a user is currently logged in.
   const session = await getServerSession(authOptions);
+  const user = session?.user;
 
+  //Validates if a user is currently logged in.
   if (!session) {
     redirect('/api/auth/signin?callbackUrl=/add-product');
+  }
+
+  //Validates if a user is admin
+  if (user?.email != 'nyk.com.sg@gmail.com') {
+    redirect('/unauthorised');
   }
 
   return (
