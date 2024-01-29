@@ -11,6 +11,14 @@ export type CartWithProducts = Prisma.CartGetPayload<{
 }>;
 
 /**
+ * Custom type to include product information as well as the cartItem
+ * information.
+ */
+export type CartItemWithProducts = Prisma.CartItemGetPayload<{
+  include: { product: true };
+}>;
+
+/**
  * Custom type to hold shopping cart infomration, will be performing
  * an __intersection__ to combine two types to form the final type.
  */
