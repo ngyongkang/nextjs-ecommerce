@@ -6,10 +6,14 @@ import Google from 'next-auth/providers/google';
 import NextAuth from 'next-auth/next';
 import { env } from '@/lib/env';
 import { User } from '@prisma/client';
+import { mergeAnonymousCartIntoUserCart } from '@/lib/db/cart';
 
 // By adding the callback section we can change the
 // default session variables. As it is in TS we need to add the type
 // as well.
+
+// By adding the events section we can modify the default functions
+// provided by the default session.
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as Adapter,
   providers: [
@@ -23,6 +27,11 @@ export const authOptions: NextAuthOptions = {
       session.user.id = user.id;
       session.user.type = (user as User).type;
       return session;
+    },
+  },
+  events: {
+    async signIn({ user }) {
+      await mergeAnonymousCartIntoUserCart(user.id);
     },
   },
 };
