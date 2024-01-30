@@ -14,7 +14,7 @@ import { mergeAnonymousCartIntoUserCart } from '@/lib/db/cart';
 
 // By adding the events section we can modify the default functions
 // provided by the default session.
-export const authOptions: NextAuthOptions = {
+const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as Adapter,
   providers: [
     Google({
@@ -38,4 +38,4 @@ export const authOptions: NextAuthOptions = {
 
 const handler = NextAuth(authOptions);
 
-export { handler as GET, handler as POST };
+export { handler as GET, handler as POST, authOptions };
