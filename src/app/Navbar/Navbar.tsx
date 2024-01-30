@@ -7,7 +7,7 @@ import ShoppingCartButton from './ShoppingCartButton';
 import { getCart } from '@/lib/db/cart';
 import UserMenuButton from './UserMenuButton';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../api/auth/[...nextauth]/route';
+import { authOptions } from '@/app/utils/authOptions';
 
 type Props = {};
 

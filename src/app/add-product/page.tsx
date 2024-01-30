@@ -3,7 +3,7 @@ import React from 'react';
 import prisma from '@/lib/db/prisma';
 import FormButton from '@/components/FormButton';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../api/auth/[...nextauth]/route';
+import { authOptions } from '@/app/utils/authOptions';
 
 type Props = {};
 

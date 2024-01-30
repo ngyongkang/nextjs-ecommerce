@@ -2,7 +2,7 @@ import { Cart, CartItem, Prisma } from '@prisma/client';
 import { cookies, headers } from 'next/headers';
 import prisma from './prisma';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/app/utils/authOptions';
 
 /**
  * Custom type to include product information as well as the cart
