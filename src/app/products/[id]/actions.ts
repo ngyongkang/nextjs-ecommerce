@@ -12,14 +12,42 @@ export async function incrementProductQuantity(productId: string) {
   );
 
   if (articleInCart) {
-    await prisma.cartItem.update({
-      where: { id: articleInCart.id },
-      data: { quantity: { increment: 1 } },
+    // Nested update logic
+    await prisma.cart.update({
+      where: { id: cart!.id },
+      data: {
+        items: {
+          update: {
+            where: { id: articleInCart.id },
+            data: { quantity: { increment: 1 } },
+          },
+        },
+      },
     });
+
+    // Old update logic
+    // await prisma.cartItem.update({
+    //   where: { id: articleInCart.id },
+    //   data: { quantity: { increment: 1 } },
+    // });
   } else {
-    await prisma.cartItem.create({
-      data: { cartId: cart!.id, productId, quantity: 1 },
+    // Nested create logic
+    await prisma.cart.update({
+      where: { id: cart!.id },
+      data: {
+        items: {
+          create: {
+            productId,
+            quantity: 1,
+          },
+        },
+      },
     });
+
+    // Old create logic
+    // await prisma.cartItem.create({
+    //   data: { cartId: cart!.id, productId, quantity: 1 },
+    // });
   }
 
   revalidatePath('/products/[id]');

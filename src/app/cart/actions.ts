@@ -14,22 +14,60 @@ export async function setProductQuantity(productId: string, quantity: number) {
   if (quantity === 0) {
     //Delete logic
     if (articleInCart) {
-      await prisma.cartItem.delete({
-        where: { id: articleInCart.id },
+      //Converting to a nested query to the db.
+      //This allows us to retain the update time on the cart.
+      //While deleting the cartItem as previously done.
+      await prisma.cart.update({
+        where: { id: cart!.id },
+        data: { items: { delete: { id: articleInCart.id } } },
       });
+
+      // Old logic on delete
+      // await prisma.cartItem.delete({
+      //   where: { id: articleInCart.id },
+      // });
     }
   } else {
     //Update logic
     if (articleInCart) {
-      await prisma.cartItem.update({
-        where: { id: articleInCart.id },
-        data: { quantity },
+      //Nested query for update.
+      await prisma.cart.update({
+        where: { id: cart!.id },
+        data: {
+          items: {
+            update: {
+              where: { id: articleInCart.id },
+              data: { quantity },
+            },
+          },
+        },
       });
+
+      //Old logic for update
+      // await prisma.cartItem.update({
+      //   where: { id: articleInCart.id },
+      //   data: { quantity },
+      // });
     } else {
       //Create logic
-      await prisma.cartItem.create({
-        data: { cartId: cart!.id, productId, quantity },
+
+      // Nested query for create logic.
+      await prisma.cart.update({
+        where: { id: cart!.id },
+        data: {
+          items: {
+            create: {
+              productId,
+              quantity,
+            },
+          },
+        },
       });
+
+      // Old create logic
+      // await prisma.cartItem.create({
+      //   data: { cartId: cart!.id, productId, quantity },
+      // });
     }
   }
 
