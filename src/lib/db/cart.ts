@@ -21,7 +21,7 @@ export type CartItemWithProducts = Prisma.CartItemGetPayload<{
 }>;
 
 /**
- * Custom type to hold shopping cart infomration, will be performing
+ * Custom type to hold shopping cart information, will be performing
  * an __intersection__ to combine two types to form the final type.
  */
 export type ShoppingCart = CartWithProducts & {

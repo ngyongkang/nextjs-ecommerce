@@ -1,54 +1,14 @@
 import { redirect } from 'next/navigation';
 import React from 'react';
-import prisma from '@/lib/db/prisma';
 import FormButton from '@/components/FormButton';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/utils/authOptions';
-
+import { addProduct } from '@/lib/db/product';
 type Props = {};
 
 export const metadata = {
   title: 'Add Product - Stick & Treat',
 };
-
-/**
- * Function to perform __Server Action__ on Next JS, this function
- * allows the usage of a form action which sends data via server instead
- * of sending data via client. This helps to move the processing to backend
- * as well as cut out code on the clientside such as fetching data from
- * an api.
- * @param formData - param to pass formData to backend.
- */
-async function addProduct(formData: FormData) {
-  'use server';
-
-  const session = await getServerSession(authOptions);
-  const user = session?.user;
-
-  //Validates if a user is currently logged in.
-  if (!session) {
-    redirect('/api/auth/signin?callbackUrl=/add-product');
-  }
-
-  //Validates if a user is admin
-  if (user?.type != 'Admin') {
-    redirect('/');
-  }
-
-  const name = formData.get('name')?.toString();
-  const description = formData.get('description')?.toString();
-  const imageUrl = formData.get('imageUrl')?.toString();
-  const price = Number(formData.get('price') || 0);
-
-  if (!name || !description || !imageUrl || !price)
-    throw Error('Missing required fields');
-
-  await prisma?.product.create({
-    data: { name, description, imageUrl, price },
-  });
-
-  redirect('/');
-}
 
 export default async function page({}: Props) {
   const session = await getServerSession(authOptions);

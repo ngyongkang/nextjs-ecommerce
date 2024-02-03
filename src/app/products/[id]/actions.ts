@@ -50,5 +50,6 @@ export async function incrementProductQuantity(productId: string) {
     // });
   }
 
-  revalidatePath('/products/[id]');
+  // Had an issue where I was loading a dynamic path should use the path only.
+  revalidatePath('/products/[id]', 'page');
 }

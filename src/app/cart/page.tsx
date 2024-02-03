@@ -1,8 +1,8 @@
+import FormButton from '@/components/FormButton';
 import { getCart } from '@/lib/db/cart';
-import React from 'react';
-import CartEntry from './CartEntry';
-import { setProductQuantity } from './actions';
 import { formatPrice } from '@/lib/format';
+import CartEntry from './CartEntry';
+import { redirectCheckout, setProductQuantity } from './actions';
 
 type Props = {};
 
@@ -30,9 +30,9 @@ async function page({}: Props) {
           Total: {formatPrice(cart?.subtotal || 0)}
         </p>
         {/* Optional: Setup Stripe payment method for checkout. */}
-        <button className="btn btn-primary uppercase sm:w-[200px]">
-          Checkout
-        </button>
+        <form action={redirectCheckout}>
+          <FormButton className="btn-block uppercase">Checkout</FormButton>
+        </form>
       </div>
     </div>
   );
