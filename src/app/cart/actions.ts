@@ -2,6 +2,7 @@
 
 import { createCart, getCart } from '@/lib/db/cart';
 import prisma from '@/lib/db/prisma';
+import { getPaymentIntent, updatePaymentIntent } from '@/lib/stripeAPI';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
@@ -70,6 +71,13 @@ async function setProductQuantity(productId: string, quantity: number) {
       //   data: { cartId: cart!.id, productId, quantity },
       // });
     }
+  }
+
+  const paymentIntent = await getPaymentIntent();
+
+  if (paymentIntent.data.length > 0) {
+    const cart = (await getCart()) ?? (await createCart());
+    if (cart!.size > 0) await updatePaymentIntent(paymentIntent.data[0].id);
   }
 
   revalidatePath('/cart');

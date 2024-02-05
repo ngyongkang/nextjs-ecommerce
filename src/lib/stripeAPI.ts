@@ -1,7 +1,7 @@
 'use server';
 import { AddressParam } from '@stripe/stripe-js';
 import Stripe from 'stripe';
-import { createCart, getCart } from './db/cart';
+import { createCart, deleteCart, getCart } from './db/cart';
 import { env } from './env';
 import { currency } from './format';
 import { redirect } from 'next/navigation';
@@ -35,9 +35,12 @@ async function createPaymentIntent(paymentMethodId: string) {
       currency: currency.toLowerCase(),
       payment_method: paymentMethodId,
       use_stripe_sdk: true,
-      // confirmation_method: 'manual',
       metadata: {
         cartID: cart!.id,
+      },
+      automatic_payment_methods: {
+        enabled: true,
+        allow_redirects: 'never',
       },
     });
 
@@ -77,7 +80,7 @@ async function createPaymentIntentAddress(addressInfo: AddressValue) {
 
 async function updatePaymentIntent(
   paymenyIntentId: string,
-  paymentMethodId: string,
+  paymentMethodId?: string,
 ) {
   const cart = (await getCart()) ?? (await createCart());
   // // Create a PaymentIntent with the order amount and currency
@@ -145,20 +148,20 @@ async function cancelPaymentIntent(paymenyIntentId: string) {
  * @param formData
  */
 async function confirmPaymentIntent() {
+  const existingPaymentIntent = await getPaymentIntent();
+
+  if (existingPaymentIntent.data.length == 0)
+    redirect('/checkout?status=failed');
   try {
-    const existingPaymentIntent = await getPaymentIntent();
-
-    if (existingPaymentIntent.data.length == 0)
-      redirect('/checkout?status=failed');
-
     const paymentIntent = await stripe.paymentIntents.confirm(
       existingPaymentIntent.data[0].id,
     );
-
-    if (paymentIntent) redirect('/');
   } catch (e) {
-    throw new Error(e as string);
+    redirect('/checkout?status=failed');
   }
+
+  await deleteCart();
+  redirect('/');
 }
 
 async function listPaymentIntent() {

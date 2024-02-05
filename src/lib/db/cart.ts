@@ -105,6 +105,12 @@ export async function createCart(): Promise<ShoppingCart | null> {
   };
 }
 
+export async function deleteCart() {
+  const cart = await getCart();
+
+  await prisma.cartItem.deleteMany({ where: { cartId: cart!.id } });
+}
+
 export async function mergeAnonymousCartIntoUserCart(userId: string) {
   const localCartId = cookies().get('localCartId')?.value;
 

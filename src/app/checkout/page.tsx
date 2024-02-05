@@ -7,12 +7,9 @@ import {
   cancelPaymentIntent,
   confirmPaymentIntent,
   createPaymentIntent,
-  createPaymentIntentAddress,
   getPaymentIntent,
   updatePaymentIntent,
-  updatePaymentIntentAddress,
 } from '@/lib/stripeAPI';
-import AddressForm from './AddressForm';
 import CheckoutForm from './CheckoutForm';
 import StripeWrapper from './StripeWrapper';
 
@@ -29,21 +26,6 @@ async function page({}: Props) {
   }
   return (
     <div className="join join-vertical w-full">
-      <div className="collapse join-item collapse-plus border border-base-300">
-        <input type="radio" name="my-accordion-4" />
-        <div className="collapse-title text-xl font-medium">
-          Shipping Address
-        </div>
-        <div className="collapse-content">
-          {/* <StripeWrapper subtotal={cart!.subtotal}>
-            <AddressForm
-              createPaymentIntentAddress={createPaymentIntentAddress}
-              getPaymentIntent={getPaymentIntent}
-              updatePaymentIntentAddress={updatePaymentIntentAddress}
-            />
-          </StripeWrapper> */}
-        </div>
-      </div>
       <div className="collapse join-item collapse-plus border border-base-300">
         <input type="radio" name="my-accordion-4" />
         <div className="collapse-title text-xl font-medium">
