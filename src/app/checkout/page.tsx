@@ -1,66 +1,93 @@
-import { getCart } from '@/lib/db/cart';
-import CheckoutForm from './CheckoutForm';
-import StripeWrapper from './StripeWrapper';
 import CartEntry from '@/app/cart/CartEntry';
 import { setProductQuantity } from '@/app/cart/actions';
-import { formatPrice } from '@/lib/format';
 import FormButton from '@/components/FormButton';
-import { createPaymentIntent } from '@/lib/stripeAPI';
+import { getCart } from '@/lib/db/cart';
+import { formatPrice } from '@/lib/format';
+import {
+  cancelPaymentIntent,
+  confirmPaymentIntent,
+  createPaymentIntent,
+  createPaymentIntentAddress,
+  getPaymentIntent,
+  updatePaymentIntent,
+  updatePaymentIntentAddress,
+} from '@/lib/stripeAPI';
+import AddressForm from './AddressForm';
+import CheckoutForm from './CheckoutForm';
+import StripeWrapper from './StripeWrapper';
 
 type Props = {};
 
 async function page({}: Props) {
   const cart = await getCart();
+  if (cart!.subtotal <= 0) {
+    const paymentIntents = await getPaymentIntent();
+    paymentIntents.data.map((paymentIntent) => {
+      cancelPaymentIntent(paymentIntent.id);
+    });
+    return <div>Cannot checkout with 0 items!!</div>;
+  }
   return (
-    <StripeWrapper subtotal={cart!.subtotal}>
-      {' '}
-      <div className="join join-vertical w-full">
-        <div className="collapse join-item collapse-plus border border-base-300">
-          <input type="radio" name="my-accordion-4" />
-          <div className="collapse-title text-xl font-medium">
-            Click to open this one and close others
-          </div>
-          <div className="collapse-content"></div>
+    <div className="join join-vertical w-full">
+      <div className="collapse join-item collapse-plus border border-base-300">
+        <input type="radio" name="my-accordion-4" />
+        <div className="collapse-title text-xl font-medium">
+          Shipping Address
         </div>
-        <div className="collapse join-item collapse-plus border border-base-300">
-          <input type="radio" name="my-accordion-4" />
-          <div className="collapse-title text-xl font-medium">
-            Payment methods
-          </div>
-          <div className="collapse-content">
-            <CheckoutForm createPaymentIntent={createPaymentIntent} />
-          </div>
+        <div className="collapse-content">
+          {/* <StripeWrapper subtotal={cart!.subtotal}>
+            <AddressForm
+              createPaymentIntentAddress={createPaymentIntentAddress}
+              getPaymentIntent={getPaymentIntent}
+              updatePaymentIntentAddress={updatePaymentIntentAddress}
+            />
+          </StripeWrapper> */}
         </div>
-        <div className="collapse join-item collapse-plus border border-base-300">
-          <input type="radio" name="my-accordion-4" defaultChecked />
-          <div className="collapse-title text-xl font-medium">
-            Review items and delivery
-          </div>
-          <div className="collapse-content">
-            {cart?.items.map((cartItem) => {
-              return (
-                <CartEntry
-                  cartItem={cartItem}
-                  key={cartItem.id}
-                  setProductQuantity={setProductQuantity}
-                />
-              );
-            })}
-            <div className="flex flex-col items-end sm:items-center">
-              <p className="mb-3 font-bold">
-                Total: {formatPrice(cart?.subtotal || 0)}
-              </p>
-              {/* Optional: Setup Stripe payment method for checkout. */}
-              <form action={'#'}>
-                <FormButton className="btn-block uppercase">
-                  Confirm Order
-                </FormButton>
-              </form>
-            </div>
+      </div>
+      <div className="collapse join-item collapse-plus border border-base-300">
+        <input type="radio" name="my-accordion-4" />
+        <div className="collapse-title text-xl font-medium">
+          Payment methods
+        </div>
+        <div className="collapse-content">
+          <StripeWrapper subtotal={cart!.subtotal}>
+            <CheckoutForm
+              createPaymentIntent={createPaymentIntent}
+              getPaymentIntent={getPaymentIntent}
+              updatePaymentIntent={updatePaymentIntent}
+            />
+          </StripeWrapper>
+        </div>
+      </div>
+      <div className="collapse join-item collapse-plus border border-base-300">
+        <input type="radio" name="my-accordion-4" defaultChecked />
+        <div className="collapse-title text-xl font-medium">
+          Review items and delivery
+        </div>
+        <div className="collapse-content">
+          {cart?.items.map((cartItem) => {
+            return (
+              <CartEntry
+                cartItem={cartItem}
+                key={cartItem.id}
+                setProductQuantity={setProductQuantity}
+              />
+            );
+          })}
+          <div className="flex flex-col items-end sm:items-center">
+            <p className="mb-3 font-bold">
+              Total: {formatPrice(cart?.subtotal || 0)}
+            </p>
+            {/* Optional: Setup Stripe payment method for checkout. */}
+            <form action={confirmPaymentIntent}>
+              <FormButton className="btn-block uppercase">
+                Confirm Order
+              </FormButton>
+            </form>
           </div>
         </div>
       </div>
-    </StripeWrapper>
+    </div>
   );
 }
 

@@ -1,38 +1,33 @@
 'use client';
 import FormButton from '@/components/FormButton';
+import { AddressValue } from '@/lib/stripeAPI';
 import {
   AddressElement,
-  CardElement,
-  PaymentElement,
   useElements,
   useStripe,
 } from '@stripe/react-stripe-js';
-import {
-  StripeAddressElementOptions,
-  StripeError,
-  StripePaymentElementOptions,
-} from '@stripe/stripe-js';
-import { useState } from 'react';
+import { StripeAddressElementOptions, StripeError } from '@stripe/stripe-js';
+import { useState, useTransition } from 'react';
 import Stripe from 'stripe';
 
-interface CheckoutFormProps {
+interface AddressFormProps {
   getPaymentIntent: () => Promise<
     Stripe.Response<Stripe.ApiSearchResult<Stripe.PaymentIntent>>
   >;
-  createPaymentIntent: (
-    paymentMethod: string,
+  createPaymentIntentAddress: (
+    addressInfo: AddressValue,
   ) => Promise<Stripe.Response<Stripe.PaymentIntent>>;
-  updatePaymentIntent: (
+  updatePaymentIntentAddress: (
     paymenyIntentId: string,
-    paymentMethodId: string,
+    paymentIntentAddress: AddressValue,
   ) => Promise<Stripe.Response<Stripe.PaymentIntent>>;
 }
 
-function CheckoutForm({
-  createPaymentIntent,
+function AddressForm({
+  createPaymentIntentAddress,
   getPaymentIntent,
-  updatePaymentIntent,
-}: CheckoutFormProps) {
+  updatePaymentIntentAddress,
+}: AddressFormProps) {
   const stripe = useStripe();
   const elements = useElements()!;
 
@@ -52,16 +47,17 @@ function CheckoutForm({
         setErrorMessage(error.message as string);
       } else {
         // Actions handled, show success message
-        setErrorMessage('Successfully confirmed payment method.');
+        setErrorMessage('Successfully confirmed shipping address.');
       }
     } else {
       // No actions needed, show success message
-      setErrorMessage('Successfully confirmed payment method.');
+      setErrorMessage('Successfully confirmed shipping address.');
     }
   };
 
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   const handleError = (error: StripeError) => {
     setLoading(false);
@@ -89,58 +85,54 @@ function CheckoutForm({
     }
 
     // Create the PaymentMethod using the details collected by the Payment Element
-    const { error, paymentMethod } = await stripe.createPaymentMethod({
-      elements,
-    });
 
-    if (error) {
-      // This point is only reached if there's an immediate error when
-      // creating the PaymentMethod. Show the error to your customer (for example, payment details incomplete)
-      handleError(error);
-      return;
-    }
+    const addressInfo = (await elements.getElement('address')?.getValue())!
+      .value;
 
-    // Create the PaymentIntent
+    // if (error) {
+    //   // This point is only reached if there's an immediate error when
+    //   // creating the PaymentMethod. Show the error to your customer (for example, payment details incomplete)
+    //   handleError(error);
+    //   return;
+    // }
+
+    // Get the PaymentIntent first before creating the PaymentIntent
     let data;
+
     if ((await getPaymentIntent()).data.length > 0) {
       data = await getPaymentIntent();
-      data = await updatePaymentIntent(data.data[0].id, paymentMethod.id);
+      data = await updatePaymentIntentAddress(data.data[0].id, addressInfo);
     } else {
-      data = await createPaymentIntent(paymentMethod.id);
+      data = await createPaymentIntentAddress(addressInfo);
     }
 
     // Handle any next actions or errors. See the Handle any next actions step for implementation.
     handleServerResponse(data);
   };
-
   const AddressElementOptions: StripeAddressElementOptions = {
     mode: 'shipping',
-  };
-
-  const paymentElementOptions: StripePaymentElementOptions = {
-    layout: {
-      type: 'tabs',
-      defaultCollapsed: false,
-    },
   };
 
   return (
     <form
       className="flex flex-col items-end gap-3 sm:items-center"
-      onSubmit={handleSubmit}
+      onSubmit={(e) =>
+        startTransition(async () => {
+          handleSubmit(e);
+        })
+      }
     >
       <AddressElement options={AddressElementOptions} className="w-full" />
-      <PaymentElement options={paymentElementOptions} className="w-full" />
       <FormButton
         type="submit"
         disabled={!stripe || loading}
-        className="uppercase"
+        className="uppercase "
       >
-        Confirm Payment Method
+        Confirm Address
       </FormButton>
       {errorMessage && <div>{errorMessage}</div>}
     </form>
   );
 }
 
-export default CheckoutForm;
+export default AddressForm;

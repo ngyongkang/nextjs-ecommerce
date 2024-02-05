@@ -24,16 +24,19 @@ async function page({}: Props) {
           />
         );
       })}
-      {!cart?.items.length && <p>Your cart is empty.</p>}
-      <div className="flex flex-col items-end sm:items-center">
-        <p className="mb-3 font-bold">
-          Total: {formatPrice(cart?.subtotal || 0)}
-        </p>
-        {/* Optional: Setup Stripe payment method for checkout. */}
-        <form action={redirectCheckout}>
-          <FormButton className="btn-block uppercase">Checkout</FormButton>
-        </form>
-      </div>
+      {!cart?.items.length ? (
+        <p>Your cart is empty.</p>
+      ) : (
+        <div className="flex flex-col items-end sm:items-center">
+          <p className="mb-3 font-bold">
+            Total: {formatPrice(cart?.subtotal || 0)}
+          </p>
+          {/* Optional: Setup Stripe payment method for checkout. */}
+          <form action={redirectCheckout}>
+            <FormButton className="btn-block uppercase">Checkout</FormButton>
+          </form>
+        </div>
+      )}
     </div>
   );
 }
