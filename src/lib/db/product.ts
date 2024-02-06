@@ -64,4 +64,22 @@ async function addProduct(formData: FormData) {
   redirect('/');
 }
 
-export { addProduct };
+async function searchProduct(query: string) {
+  try {
+    const products = prisma?.product.findMany({
+      where: {
+        OR: [
+          { name: { contains: query, mode: 'insensitive' } },
+          { description: { contains: query, mode: 'insensitive' } },
+        ],
+      },
+      orderBy: { id: 'desc' },
+    });
+
+    return products;
+  } catch (e) {
+    throw new Error(e as string);
+  }
+}
+
+export { addProduct, searchProduct };

@@ -1,4 +1,5 @@
 import ProductCard from '@/components/ProductCard';
+import { searchProduct } from '@/lib/db/product';
 import { Metadata } from 'next';
 import React from 'react';
 
@@ -16,17 +17,8 @@ export function generateMetadata({
 
 // Can add pagination for consistency
 async function SearchPage({ searchParams: { query } }: SearchPageProps) {
-  const products = await prisma?.product.findMany({
-    where: {
-      OR: [
-        { name: { contains: query, mode: 'insensitive' } },
-        { description: { contains: query, mode: 'insensitive' } },
-      ],
-    },
-    orderBy: { id: 'desc' },
-  });
-
-  if (products?.length === 0)
+  const products = await searchProduct(query);
+  if (products.length === 0)
     return <div className="text-center">No products found</div>;
 
   return (
