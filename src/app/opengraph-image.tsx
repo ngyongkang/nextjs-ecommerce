@@ -24,17 +24,20 @@ export default async function Image() {
       // ImageResponse JSX element
       <div
         style={{
-          fontSize: 128,
-          background: 'white',
-          width: '100%',
+          backgroundImage: process.env.NEXT_PUBLIC_VERCEL_URL
+            ? `url(https://${process.env.NEXT_PUBLIC_VERCEL_URL}/opengraph-image.png)`
+            : `url(http://localhost:3000/opengraph-image.png)`,
+          backgroundSize: '100% 100%',
           height: '100%',
+          width: '100%',
           display: 'flex',
-          alignItems: 'center',
+          flexDirection: 'column',
+          alignItems: 'flex-start',
           justifyContent: 'center',
+          fontFamily: 'Inter',
+          padding: '40px 80px',
         }}
-      >
-        Stick & Treat
-      </div>
+      ></div>
     ),
     // ImageResponse options
     {

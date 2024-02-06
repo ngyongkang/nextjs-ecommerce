@@ -10,9 +10,6 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'Stick & Treat',
   description: 'For sticker lovers who want to treat themselves.',
-  openGraph: {
-    url: process.env.NEXTAUTH_URL as string | 'https://localhost:3000',
-  },
 };
 
 export default function RootLayout({
