@@ -5,7 +5,6 @@ import { createCart, deleteCart, getCart } from './db/cart';
 import { env } from './env';
 import { currency } from './format';
 import { redirect } from 'next/navigation';
-
 // This is your test secret API key.
 const stripe = new Stripe(env.STRIPE_SECRET_KEY);
 
@@ -23,13 +22,19 @@ export type AddressValue = {
   };
   phone?: string;
 };
+
 /**
  * Function to create Payment Intent from stripe to start payment session.
  */
-async function createPaymentIntent(paymentMethodId: string) {
+async function createPaymentIntent(
+  paymentMethodId: string,
+  addressInfo: AddressValue,
+  email: string,
+) {
   const cart = (await getCart()) ?? (await createCart());
   // Create a PaymentIntent with the order amount and currency
   try {
+    console.log(addressInfo);
     const paymentIntent = await stripe.paymentIntents.create({
       amount: cart!.subtotal,
       currency: currency.toLowerCase(),
@@ -42,6 +47,13 @@ async function createPaymentIntent(paymentMethodId: string) {
         enabled: true,
         allow_redirects: 'never',
       },
+      shipping: {
+        address: (addressInfo?.address as AddressParam) || '',
+        name: addressInfo?.name || '',
+        carrier: '',
+        tracking_number: '',
+      },
+      receipt_email: email,
     });
 
     return paymentIntent;
@@ -80,7 +92,9 @@ async function createPaymentIntentAddress(addressInfo: AddressValue) {
 
 async function updatePaymentIntent(
   paymenyIntentId: string,
-  paymentMethodId?: string,
+  paymentMethodId: string,
+  addressInfo: AddressValue,
+  email: string,
 ) {
   const cart = (await getCart()) ?? (await createCart());
   // // Create a PaymentIntent with the order amount and currency
@@ -89,6 +103,13 @@ async function updatePaymentIntent(
       amount: cart!.subtotal,
       currency: currency.toLowerCase(),
       payment_method: paymentMethodId,
+      shipping: {
+        address: (addressInfo?.address as AddressParam) || '',
+        name: addressInfo?.name || '',
+        carrier: '',
+        tracking_number: '',
+      },
+      receipt_email: email,
     };
     const paymentIntent = await stripe.paymentIntents.update(
       paymenyIntentId,
@@ -150,13 +171,17 @@ async function cancelPaymentIntent(paymenyIntentId: string) {
 async function confirmPaymentIntent() {
   const existingPaymentIntent = await getPaymentIntent();
 
-  if (existingPaymentIntent.data.length == 0)
+  if (existingPaymentIntent.data.length == 0) {
+    console.log('No existing payment Intent.');
     redirect('/checkout?status=failed');
+  }
+
   try {
     const paymentIntent = await stripe.paymentIntents.confirm(
       existingPaymentIntent.data[0].id,
     );
   } catch (e) {
+    console.log(e);
     redirect('/checkout?status=failed');
   }
 
@@ -199,6 +224,7 @@ async function getPaymentIntent() {
     const paymentIntent = await stripe.paymentIntents.search({
       query: `metadata[\'cartID\']: \'${cart!.id}\' AND -status:\'canceled\' AND -status:\'succeeded\'`,
     });
+
     return paymentIntent;
   } catch (e) {
     throw new Error(e as string);

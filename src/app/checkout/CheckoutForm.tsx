@@ -1,8 +1,9 @@
 'use client';
 import FormButton from '@/components/FormButton';
+import { AddressValue } from '@/lib/stripeAPI';
 import {
   AddressElement,
-  CardElement,
+  LinkAuthenticationElement,
   PaymentElement,
   useElements,
   useStripe,
@@ -21,10 +22,14 @@ interface CheckoutFormProps {
   >;
   createPaymentIntent: (
     paymentMethod: string,
+    addressInfo: AddressValue,
+    email: string,
   ) => Promise<Stripe.Response<Stripe.PaymentIntent>>;
   updatePaymentIntent: (
     paymenyIntentId: string,
     paymentMethodId: string,
+    addressInfo: AddressValue,
+    email: string,
   ) => Promise<Stripe.Response<Stripe.PaymentIntent>>;
 }
 
@@ -62,6 +67,7 @@ function CheckoutForm({
 
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [customerEmail, setCustomerEmail] = useState('');
 
   const handleError = (error: StripeError) => {
     setLoading(false);
@@ -93,6 +99,10 @@ function CheckoutForm({
       elements,
     });
 
+    //Collect address information from Address Element
+    const addressInfo = (await elements.getElement('address')?.getValue())!
+      .value;
+
     if (error) {
       // This point is only reached if there's an immediate error when
       // creating the PaymentMethod. Show the error to your customer (for example, payment details incomplete)
@@ -104,17 +114,33 @@ function CheckoutForm({
     let data;
     if ((await getPaymentIntent()).data.length > 0) {
       data = await getPaymentIntent();
-      data = await updatePaymentIntent(data.data[0].id, paymentMethod.id);
+      data = await updatePaymentIntent(
+        data.data[0].id,
+        paymentMethod.id,
+        addressInfo,
+        customerEmail,
+      );
     } else {
-      data = await createPaymentIntent(paymentMethod.id);
+      data = await createPaymentIntent(
+        paymentMethod.id,
+        addressInfo,
+        customerEmail,
+      );
     }
 
     // Handle any next actions or errors. See the Handle any next actions step for implementation.
     handleServerResponse(data);
   };
 
+  /**  Customisation section  **/
   const AddressElementOptions: StripeAddressElementOptions = {
     mode: 'shipping',
+    display: {
+      name: 'split',
+    },
+    fields: {
+      phone: 'always',
+    },
   };
 
   const paymentElementOptions: StripePaymentElementOptions = {
@@ -123,6 +149,7 @@ function CheckoutForm({
       defaultCollapsed: false,
     },
   };
+  /**  Customisation section  **/
 
   return (
     <form
@@ -130,6 +157,10 @@ function CheckoutForm({
       onSubmit={handleSubmit}
     >
       <AddressElement options={AddressElementOptions} className="w-full" />
+      <LinkAuthenticationElement
+        onChange={(e) => setCustomerEmail(e.value.email)}
+        className="w-full"
+      />
       <PaymentElement options={paymentElementOptions} className="w-full" />
       <FormButton
         type="submit"
