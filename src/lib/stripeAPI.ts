@@ -92,24 +92,39 @@ async function createPaymentIntentAddress(addressInfo: AddressValue) {
 
 async function updatePaymentIntent(
   paymenyIntentId: string,
-  paymentMethodId: string,
-  addressInfo: AddressValue,
-  email: string,
+  paymentMethodId?: string,
+  addressInfo?: AddressValue,
+  email?: string,
 ) {
   const cart = (await getCart()) ?? (await createCart());
   // // Create a PaymentIntent with the order amount and currency
   try {
+    //If block to update payment details at checkout
+    if (paymentMethodId && addressInfo && email) {
+      const paymentIntentOptions: Stripe.PaymentIntentUpdateParams = {
+        amount: cart!.subtotal,
+        currency: currency.toLowerCase(),
+        payment_method: paymentMethodId,
+        shipping: {
+          address: (addressInfo?.address as AddressParam) || '',
+          name: addressInfo?.name || '',
+          carrier: '',
+          tracking_number: '',
+        },
+        receipt_email: email,
+      };
+      const paymentIntent = await stripe.paymentIntents.update(
+        paymenyIntentId,
+        paymentIntentOptions,
+      );
+
+      return paymentIntent;
+    }
+
+    //Normal update for cart updates.
     const paymentIntentOptions: Stripe.PaymentIntentUpdateParams = {
       amount: cart!.subtotal,
       currency: currency.toLowerCase(),
-      payment_method: paymentMethodId,
-      shipping: {
-        address: (addressInfo?.address as AddressParam) || '',
-        name: addressInfo?.name || '',
-        carrier: '',
-        tracking_number: '',
-      },
-      receipt_email: email,
     };
     const paymentIntent = await stripe.paymentIntents.update(
       paymenyIntentId,
